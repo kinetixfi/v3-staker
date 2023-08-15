@@ -8,7 +8,7 @@ describe('unit/RewardMath', () => {
 
   before('setup test reward math', async () => {
     const factory = await ethers.getContractFactory('TestRewardMath')
-    rewardMath = (await factory.deploy()) as TestRewardMath
+    rewardMath = ((await factory.deploy()) as unknown) as TestRewardMath
   })
 
   it('half the liquidity over 20% of the total duration', async () => {

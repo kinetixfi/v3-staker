@@ -13,7 +13,7 @@ import { linkLibraries } from './linkLibraries'
 import { ISwapRouter } from '../../types/ISwapRouter'
 import { IWETH9 } from '../../types/IWETH9'
 import {
-  UniswapV3Staker,
+  KinetixV3Staker,
   TestERC20,
   INonfungiblePositionManager,
   IUniswapV3Factory,
@@ -27,16 +27,16 @@ import { ActorFixture } from './actors'
 type WETH9Fixture = { weth9: IWETH9 }
 
 export const wethFixture: Fixture<WETH9Fixture> = async ([wallet]) => {
-  const weth9 = (await waffle.deployContract(wallet, {
+  const weth9 = ((await waffle.deployContract(<any>wallet, {
     bytecode: WETH9.bytecode,
     abi: WETH9.abi,
-  })) as IWETH9
+  })) as unknown) as IWETH9
 
   return { weth9 }
 }
 
 const v3CoreFactoryFixture: Fixture<IUniswapV3Factory> = async ([wallet]) => {
-  return ((await waffle.deployContract(wallet, {
+  return ((await waffle.deployContract(<any>wallet, {
     bytecode: UniswapV3FactoryJson.bytecode,
     abi: UniswapV3FactoryJson.abi,
   })) as unknown) as IUniswapV3Factory
@@ -50,7 +50,7 @@ export const v3RouterFixture: Fixture<{
   const { weth9 } = await wethFixture([wallet], provider)
   const factory = await v3CoreFactoryFixture([wallet], provider)
   const router = ((await waffle.deployContract(
-    wallet,
+    <any>wallet,
     {
       bytecode: SwapRouter.bytecode,
       abi: SwapRouter.abi,
@@ -62,10 +62,10 @@ export const v3RouterFixture: Fixture<{
 }
 
 const nftDescriptorLibraryFixture: Fixture<NFTDescriptor> = async ([wallet]) => {
-  return (await waffle.deployContract(wallet, {
+  return ((await waffle.deployContract(<any>wallet, {
     bytecode: NFTDescriptorJson.bytecode,
     abi: NFTDescriptorJson.abi,
-  })) as NFTDescriptor
+  })) as unknown) as NFTDescriptor
 }
 
 type UniswapFactoryFixture = {
@@ -79,11 +79,11 @@ type UniswapFactoryFixture = {
 export const uniswapFactoryFixture: Fixture<UniswapFactoryFixture> = async (wallets, provider) => {
   const { weth9, factory, router } = await v3RouterFixture(wallets, provider)
   const tokenFactory = await ethers.getContractFactory('TestERC20')
-  const tokens = (await Promise.all([
+  const tokens = ((await Promise.all([
     tokenFactory.deploy(constants.MaxUint256.div(2)), // do not use maxu256 to avoid overflowing
     tokenFactory.deploy(constants.MaxUint256.div(2)),
     tokenFactory.deploy(constants.MaxUint256.div(2)),
-  ])) as [TestERC20, TestERC20, TestERC20]
+  ])) as unknown) as [TestERC20, TestERC20, TestERC20]
 
   const nftDescriptorLibrary = await nftDescriptorLibraryFixture(wallets, provider)
 
@@ -107,7 +107,7 @@ export const uniswapFactoryFixture: Fixture<UniswapFactoryFixture> = async (wall
   )
 
   const positionDescriptor = await waffle.deployContract(
-    wallets[0],
+    <any>wallets[0],
     {
       bytecode: linkedBytecode,
       abi: NonfungibleTokenPositionDescriptor.abi,
@@ -120,11 +120,11 @@ export const uniswapFactoryFixture: Fixture<UniswapFactoryFixture> = async (wall
     NonfungiblePositionManagerJson.bytecode,
     wallets[0]
   )
-  const nft = (await nftFactory.deploy(
+  const nft = ((await nftFactory.deploy(
     factory.address,
     weth9.address,
     positionDescriptor.address
-  )) as INonfungiblePositionManager
+  )) as unknown) as INonfungiblePositionManager
 
   tokens.sort((a, b) => (a.address.toLowerCase() < b.address.toLowerCase() ? -1 : 1))
 
@@ -206,7 +206,7 @@ export type UniswapFixtureType = {
   pool12: string
   poolObj: IUniswapV3Pool
   router: ISwapRouter
-  staker: UniswapV3Staker
+  staker: KinetixV3Staker
   testIncentiveId: TestIncentiveId
   tokens: [TestERC20, TestERC20, TestERC20]
   token0: TestERC20
@@ -216,11 +216,16 @@ export type UniswapFixtureType = {
 export const uniswapFixture: Fixture<UniswapFixtureType> = async (wallets, provider) => {
   const { tokens, nft, factory, router } = await uniswapFactoryFixture(wallets, provider)
   const signer = new ActorFixture(wallets, provider).stakerDeployer()
-  const stakerFactory = await ethers.getContractFactory('UniswapV3Staker', signer)
-  const staker = (await stakerFactory.deploy(factory.address, nft.address, 2 ** 32, 2 ** 32)) as UniswapV3Staker
+  const stakerFactory = await ethers.getContractFactory('KinetixV3Staker', <any>signer)
+  const staker = ((await stakerFactory.deploy(
+    factory.address,
+    nft.address,
+    2 ** 32,
+    2 ** 32
+  )) as unknown) as KinetixV3Staker
 
-  const testIncentiveIdFactory = await ethers.getContractFactory('TestIncentiveId', signer)
-  const testIncentiveId = (await testIncentiveIdFactory.deploy()) as TestIncentiveId
+  const testIncentiveIdFactory = await ethers.getContractFactory('TestIncentiveId', <any>signer)
+  const testIncentiveId = ((await testIncentiveIdFactory.deploy()) as unknown) as TestIncentiveId
 
   for (const token of tokens) {
     await token.approve(nft.address, constants.MaxUint256)
@@ -235,7 +240,7 @@ export const uniswapFixture: Fixture<UniswapFixtureType> = async (wallets, provi
 
   const pool12 = await factory.getPool(tokens[1].address, tokens[2].address, fee)
 
-  const poolObj = poolFactory.attach(pool01) as IUniswapV3Pool
+  const poolObj = (poolFactory.attach(pool01) as unknown) as IUniswapV3Pool
 
   return {
     nft,

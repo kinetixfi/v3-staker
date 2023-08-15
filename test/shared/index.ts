@@ -135,7 +135,7 @@ export const arrayWrap = (x: any) => {
 export const erc20Wrap = async (x: string | TestERC20): Promise<TestERC20> => {
   if (isString(x)) {
     const factory = await ethers.getContractFactory('TestERC20')
-    return factory.attach(x) as TestERC20
+    return (factory.attach(x) as unknown) as TestERC20
   }
   return x
 }

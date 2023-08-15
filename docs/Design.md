@@ -1,4 +1,4 @@
-# Uniswap V3 Staker
+# Kinetix V3 Staker
 
 There is a canonical position staking contract, Staker.
 
@@ -20,6 +20,7 @@ struct Stake {
   uint160 secondsPerLiquidityInsideInitialX128;
   uint128 liquidity;
 }
+
 ```
 
 State:

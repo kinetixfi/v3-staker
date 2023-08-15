@@ -61,7 +61,7 @@ describe('unit/Deposits', () => {
       context.nft.address
     )
 
-    tokenId = await mintPosition(context.nft.connect(lpUser0), {
+    tokenId = await mintPosition(context.nft.connect(<any>lpUser0), {
       token0: context.token0.address,
       token1: context.token1.address,
       fee: FeeAmount.MEDIUM,
@@ -116,7 +116,7 @@ describe('unit/Deposits', () => {
 
       subject = async (data: string, actor: Wallet = lpUser0) => {
         await context.nft
-          .connect(actor)
+          .connect(<any>actor)
           [SAFE_TRANSFER_FROM_SIGNATURE](actor.address, context.staker.address, tokenId, data, {
             ...maxGas,
             from: actor.address,
@@ -231,7 +231,7 @@ describe('unit/Deposits', () => {
         context.nft.address
       )
 
-      tokenId = await mintPosition(context.nft.connect(lpUser0), {
+      tokenId = await mintPosition(context.nft.connect(<any>lpUser0), {
         token0: context.token0.address,
         token1: context.token1.address,
         fee: FeeAmount.MEDIUM,
@@ -265,7 +265,7 @@ describe('unit/Deposits', () => {
       it('deposits the token', async () => {
         expect((await context.staker.deposits(tokenId)).owner).to.equal(constants.AddressZero)
         await context.nft
-          .connect(lpUser0)
+          .connect(<any>lpUser0)
           ['safeTransferFrom(address,address,uint256)'](lpUser0.address, context.staker.address, tokenId, {
             ...maxGas,
             from: lpUser0.address,
@@ -286,7 +286,7 @@ describe('unit/Deposits', () => {
         const stakeBefore = await context.staker.stakes(tokenId, incentiveId)
         const depositBefore = await context.staker.deposits(tokenId)
         await context.nft
-          .connect(lpUser0)
+          .connect(<any>lpUser0)
           ['safeTransferFrom(address,address,uint256,bytes)'](lpUser0.address, context.staker.address, tokenId, data, {
             ...maxGas,
             from: lpUser0.address,
@@ -302,7 +302,7 @@ describe('unit/Deposits', () => {
       it('has gas cost', async () => {
         await snapshotGasCost(
           context.nft
-            .connect(lpUser0)
+            .connect(<any>lpUser0)
             ['safeTransferFrom(address,address,uint256,bytes)'](
               lpUser0.address,
               context.staker.address,
@@ -320,7 +320,7 @@ describe('unit/Deposits', () => {
     describe('on invalid call', async () => {
       it('reverts when called by contract other than uniswap v3 nonfungiblePositionManager', async () => {
         await expect(
-          context.staker.connect(lpUser0).onERC721Received(incentiveCreator.address, lpUser0.address, 1, data)
+          context.staker.connect(<any>lpUser0).onERC721Received(incentiveCreator.address, lpUser0.address, 1, data)
         ).to.be.revertedWith('UniswapV3Staker::onERC721Received: not a univ3 nft')
       })
 
@@ -337,7 +337,7 @@ describe('unit/Deposits', () => {
 
         await expect(
           context.nft
-            .connect(lpUser0)
+            .connect(<any>lpUser0)
             ['safeTransferFrom(address,address,uint256,bytes)'](
               lpUser0.address,
               context.staker.address,
@@ -352,10 +352,10 @@ describe('unit/Deposits', () => {
   describe('#withdrawToken', () => {
     beforeEach(async () => {
       await context.nft
-        .connect(lpUser0)
+        .connect(<any>lpUser0)
         ['safeTransferFrom(address,address,uint256)'](lpUser0.address, context.staker.address, tokenId)
 
-      subject = (_tokenId, _recipient) => context.staker.connect(lpUser0).withdrawToken(_tokenId, _recipient, '0x')
+      subject = (_tokenId, _recipient) => context.staker.connect(<any>lpUser0).withdrawToken(_tokenId, _recipient, '0x')
     })
 
     describe('works and', () => {
@@ -387,9 +387,9 @@ describe('unit/Deposits', () => {
     describe('fails if', () => {
       it('you are withdrawing a token that is not yours', async () => {
         const notOwner = actors.traderUser1()
-        await expect(context.staker.connect(notOwner).withdrawToken(tokenId, notOwner.address, '0x')).to.revertedWith(
-          'UniswapV3Staker::withdrawToken: only owner can withdraw token'
-        )
+        await expect(
+          context.staker.connect(<any>notOwner).withdrawToken(tokenId, notOwner.address, '0x')
+        ).to.revertedWith('UniswapV3Staker::withdrawToken: only owner can withdraw token')
       })
 
       it('number of stakes is not 0', async () => {
@@ -402,7 +402,7 @@ describe('unit/Deposits', () => {
         }
         const incentive = await helpers.createIncentiveFlow(incentiveParams)
         await Time.setAndMine(timestamps.startTime + 1)
-        await context.staker.connect(lpUser0).stakeToken(
+        await context.staker.connect(<any>lpUser0).stakeToken(
           {
             ...incentive,
             pool: context.pool01,
@@ -422,35 +422,36 @@ describe('unit/Deposits', () => {
     const lpUser1 = actors.lpUser1()
     beforeEach('create a deposit by lpUser0', async () => {
       await context.nft
-        .connect(lpUser0)
+        .connect(<any>lpUser0)
         ['safeTransferFrom(address,address,uint256)'](lpUser0.address, context.staker.address, tokenId)
     })
 
     it('emits a DepositTransferred event', () =>
-      expect(context.staker.connect(lpUser0).transferDeposit(tokenId, lpUser1.address))
+      expect(context.staker.connect(<any>lpUser0).transferDeposit(tokenId, lpUser1.address))
         .to.emit(context.staker, 'DepositTransferred')
         .withArgs(tokenId, recipient, lpUser1.address))
 
     it('transfers nft ownership', async () => {
       const { owner: ownerBefore } = await context.staker.deposits(tokenId)
-      await context.staker.connect(lpUser0).transferDeposit(tokenId, lpUser1.address)
+      await context.staker.connect(<any>lpUser0).transferDeposit(tokenId, lpUser1.address)
       const { owner: ownerAfter } = await context.staker.deposits(tokenId)
       expect(ownerBefore).to.eq(lpUser0.address)
       expect(ownerAfter).to.eq(lpUser1.address)
     })
 
     it('can only be called by the owner', async () => {
-      await expect(context.staker.connect(lpUser1).transferDeposit(tokenId, lpUser1.address)).to.be.revertedWith(
+      await expect(context.staker.connect(<any>lpUser1).transferDeposit(tokenId, lpUser1.address)).to.be.revertedWith(
         'UniswapV3Staker::transferDeposit: can only be called by deposit owner'
       )
     })
 
     it('cannot be transferred to address 0', async () => {
-      await expect(context.staker.connect(lpUser0).transferDeposit(tokenId, constants.AddressZero)).to.be.revertedWith(
-        'UniswapV3Staker::transferDeposit: invalid transfer recipient'
-      )
+      await expect(
+        context.staker.connect(<any>lpUser0).transferDeposit(tokenId, constants.AddressZero)
+      ).to.be.revertedWith('UniswapV3Staker::transferDeposit: invalid transfer recipient')
     })
 
-    it('has gas cost', () => snapshotGasCost(context.staker.connect(lpUser0).transferDeposit(tokenId, lpUser1.address)))
+    it('has gas cost', () =>
+      snapshotGasCost(context.staker.connect(<any>lpUser0).transferDeposit(tokenId, lpUser1.address)))
   })
 })

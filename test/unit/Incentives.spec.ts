@@ -56,7 +56,7 @@ describe('unit/Incentives', async () => {
 
         const { startTime, endTime } = makeTimestamps(await blockTimestamp())
 
-        return await context.staker.connect(incentiveCreator).createIncentive(
+        return await context.staker.connect(<any>incentiveCreator).createIncentive(
           {
             rewardToken: params.rewardToken || context.rewardToken.address,
             pool: context.pool01,
@@ -138,7 +138,7 @@ describe('unit/Incentives', async () => {
           pool: context.pool01,
         }
         await erc20Helper.ensureBalancesAndApprovals(actors.lpUser0(), rewardToken, BN(100), context.staker.address)
-        await context.staker.connect(actors.lpUser0()).createIncentive(incentiveKey, 100)
+        await context.staker.connect(<any>actors.lpUser0()).createIncentive(incentiveKey, 100)
         const incentiveId = await context.testIncentiveId.compute(incentiveKey)
         let { totalRewardUnclaimed, totalSecondsClaimedX128, numberOfStakes } = await context.staker.incentives(
           incentiveId
@@ -160,13 +160,13 @@ describe('unit/Incentives', async () => {
 
         await Time.set(testTimestamps.startTime)
         await context.staker
-          .connect(actors.lpUser0())
+          .connect(<any>actors.lpUser0())
           .multicall([
             context.staker.interface.encodeFunctionData('createIncentive', [incentiveKey, 50]),
             context.staker.interface.encodeFunctionData('stakeToken', [incentiveKey, tokenId]),
           ])
         ;({ totalRewardUnclaimed, totalSecondsClaimedX128, numberOfStakes } = await context.staker
-          .connect(actors.lpUser0())
+          .connect(<any>actors.lpUser0())
           .incentives(incentiveId))
         expect(totalRewardUnclaimed).to.equal(150)
         expect(totalSecondsClaimedX128).to.equal(0)
@@ -182,7 +182,7 @@ describe('unit/Incentives', async () => {
       it('is initialized with a non-contract token', async () => {
         const { startTime, endTime } = makeTimestamps(await blockTimestamp())
         await expect(
-          context.staker.connect(incentiveCreator).createIncentive(
+          context.staker.connect(<any>incentiveCreator).createIncentive(
             {
               rewardToken: `0x${'badadd2e55'.repeat(4)}`,
               pool: context.pool01,
@@ -241,7 +241,7 @@ describe('unit/Incentives', async () => {
           const now = await blockTimestamp()
 
           await expect(
-            context.staker.connect(incentiveCreator).createIncentive(
+            context.staker.connect(<any>incentiveCreator).createIncentive(
               {
                 rewardToken: context.rewardToken.address,
                 pool: context.pool01,
@@ -271,7 +271,7 @@ describe('unit/Incentives', async () => {
       })
 
       subject = async (params: Partial<ContractParams.EndIncentive> = {}) => {
-        return await context.staker.connect(incentiveCreator).endIncentive({
+        return await context.staker.connect(<any>incentiveCreator).endIncentive({
           rewardToken: params.rewardToken || context.rewardToken.address,
           pool: context.pool01,
           startTime: params.startTime || timestamps.startTime,

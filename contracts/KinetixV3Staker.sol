@@ -8,15 +8,15 @@ import './libraries/RewardMath.sol';
 import './libraries/NFTPositionInfo.sol';
 import './libraries/TransferHelperExtended.sol';
 
-import '@uniswap/v3-core/contracts/interfaces/IUniswapV3Factory.sol';
-import '@uniswap/v3-core/contracts/interfaces/IUniswapV3Pool.sol';
-import '@uniswap/v3-core/contracts/interfaces/IERC20Minimal.sol';
+import '@kinetix/v3-core-smart-contracts/contracts/interfaces/IUniswapV3Factory.sol';
+import '@kinetix/v3-core-smart-contracts/contracts/interfaces/IUniswapV3Pool.sol';
+import '@kinetix/v3-core-smart-contracts/contracts/interfaces/IERC20Minimal.sol';
 
-import '@uniswap/v3-periphery/contracts/interfaces/INonfungiblePositionManager.sol';
-import '@uniswap/v3-periphery/contracts/base/Multicall.sol';
+import '@kinetix/v3-periphery/contracts/interfaces/INonfungiblePositionManager.sol';
+import '@kinetix/v3-periphery/contracts/base/Multicall.sol';
 
-/// @title Uniswap V3 canonical staking interface
-contract UniswapV3Staker is IUniswapV3Staker, Multicall {
+/// @title Kinetix V3 canonical staking interface
+contract KinetixV3Staker is IUniswapV3Staker, Multicall {
     /// @notice Represents a staking incentive
     struct Incentive {
         uint256 totalRewardUnclaimed;
@@ -95,19 +95,19 @@ contract UniswapV3Staker is IUniswapV3Staker, Multicall {
 
     /// @inheritdoc IUniswapV3Staker
     function createIncentive(IncentiveKey memory key, uint256 reward) external override {
-        require(reward > 0, 'UniswapV3Staker::createIncentive: reward must be positive');
+        require(reward > 0, 'KinetixV3Staker::createIncentive: reward must be positive');
         require(
             block.timestamp <= key.startTime,
-            'UniswapV3Staker::createIncentive: start time must be now or in the future'
+            'KinetixV3Staker::createIncentive: start time must be now or in the future'
         );
         require(
             key.startTime - block.timestamp <= maxIncentiveStartLeadTime,
-            'UniswapV3Staker::createIncentive: start time too far into future'
+            'KinetixV3Staker::createIncentive: start time too far into future'
         );
-        require(key.startTime < key.endTime, 'UniswapV3Staker::createIncentive: start time must be before end time');
+        require(key.startTime < key.endTime, 'KinetixV3Staker::createIncentive: start time must be before end time');
         require(
             key.endTime - key.startTime <= maxIncentiveDuration,
-            'UniswapV3Staker::createIncentive: incentive duration is too long'
+            'KinetixV3Staker::createIncentive: incentive duration is too long'
         );
 
         bytes32 incentiveId = IncentiveId.compute(key);
@@ -121,17 +121,17 @@ contract UniswapV3Staker is IUniswapV3Staker, Multicall {
 
     /// @inheritdoc IUniswapV3Staker
     function endIncentive(IncentiveKey memory key) external override returns (uint256 refund) {
-        require(block.timestamp >= key.endTime, 'UniswapV3Staker::endIncentive: cannot end incentive before end time');
+        require(block.timestamp >= key.endTime, 'KinetixV3Staker::endIncentive: cannot end incentive before end time');
 
         bytes32 incentiveId = IncentiveId.compute(key);
         Incentive storage incentive = incentives[incentiveId];
 
         refund = incentive.totalRewardUnclaimed;
 
-        require(refund > 0, 'UniswapV3Staker::endIncentive: no refund available');
+        require(refund > 0, 'KinetixV3Staker::endIncentive: no refund available');
         require(
             incentive.numberOfStakes == 0,
-            'UniswapV3Staker::endIncentive: cannot end incentive while deposits are staked'
+            'KinetixV3Staker::endIncentive: cannot end incentive while deposits are staked'
         );
 
         // issue the refund
@@ -154,7 +154,7 @@ contract UniswapV3Staker is IUniswapV3Staker, Multicall {
     ) external override returns (bytes4) {
         require(
             msg.sender == address(nonfungiblePositionManager),
-            'UniswapV3Staker::onERC721Received: not a univ3 nft'
+            'KinetixV3Staker::onERC721Received: not a univ3 nft'
         );
 
         (, , , , , int24 tickLower, int24 tickUpper, , , , , ) = nonfungiblePositionManager.positions(tokenId);
@@ -177,9 +177,9 @@ contract UniswapV3Staker is IUniswapV3Staker, Multicall {
 
     /// @inheritdoc IUniswapV3Staker
     function transferDeposit(uint256 tokenId, address to) external override {
-        require(to != address(0), 'UniswapV3Staker::transferDeposit: invalid transfer recipient');
+        require(to != address(0), 'KinetixV3Staker::transferDeposit: invalid transfer recipient');
         address owner = deposits[tokenId].owner;
-        require(owner == msg.sender, 'UniswapV3Staker::transferDeposit: can only be called by deposit owner');
+        require(owner == msg.sender, 'KinetixV3Staker::transferDeposit: can only be called by deposit owner');
         deposits[tokenId].owner = to;
         emit DepositTransferred(tokenId, owner, to);
     }
@@ -190,10 +190,10 @@ contract UniswapV3Staker is IUniswapV3Staker, Multicall {
         address to,
         bytes memory data
     ) external override {
-        require(to != address(this), 'UniswapV3Staker::withdrawToken: cannot withdraw to staker');
+        require(to != address(this), 'KinetixV3Staker::withdrawToken: cannot withdraw to staker');
         Deposit memory deposit = deposits[tokenId];
-        require(deposit.numberOfStakes == 0, 'UniswapV3Staker::withdrawToken: cannot withdraw token while staked');
-        require(deposit.owner == msg.sender, 'UniswapV3Staker::withdrawToken: only owner can withdraw token');
+        require(deposit.numberOfStakes == 0, 'KinetixV3Staker::withdrawToken: cannot withdraw token while staked');
+        require(deposit.owner == msg.sender, 'KinetixV3Staker::withdrawToken: only owner can withdraw token');
 
         delete deposits[tokenId];
         emit DepositTransferred(tokenId, deposit.owner, address(0));
@@ -203,7 +203,7 @@ contract UniswapV3Staker is IUniswapV3Staker, Multicall {
 
     /// @inheritdoc IUniswapV3Staker
     function stakeToken(IncentiveKey memory key, uint256 tokenId) external override {
-        require(deposits[tokenId].owner == msg.sender, 'UniswapV3Staker::stakeToken: only owner can stake token');
+        require(deposits[tokenId].owner == msg.sender, 'KinetixV3Staker::stakeToken: only owner can stake token');
 
         _stakeToken(key, tokenId);
     }
@@ -215,7 +215,7 @@ contract UniswapV3Staker is IUniswapV3Staker, Multicall {
         if (block.timestamp < key.endTime) {
             require(
                 deposit.owner == msg.sender,
-                'UniswapV3Staker::unstakeToken: only owner can withdraw token before incentive end time'
+                'KinetixV3Staker::unstakeToken: only owner can withdraw token before incentive end time'
             );
         }
 
@@ -223,7 +223,7 @@ contract UniswapV3Staker is IUniswapV3Staker, Multicall {
 
         (uint160 secondsPerLiquidityInsideInitialX128, uint128 liquidity) = stakes(tokenId, incentiveId);
 
-        require(liquidity != 0, 'UniswapV3Staker::unstakeToken: stake does not exist');
+        require(liquidity != 0, 'KinetixV3Staker::unstakeToken: stake does not exist');
 
         Incentive storage incentive = incentives[incentiveId];
 
@@ -286,7 +286,7 @@ contract UniswapV3Staker is IUniswapV3Staker, Multicall {
         bytes32 incentiveId = IncentiveId.compute(key);
 
         (uint160 secondsPerLiquidityInsideInitialX128, uint128 liquidity) = stakes(tokenId, incentiveId);
-        require(liquidity > 0, 'UniswapV3Staker::getRewardInfo: stake does not exist');
+        require(liquidity > 0, 'KinetixV3Staker::getRewardInfo: stake does not exist');
 
         Deposit memory deposit = deposits[tokenId];
         Incentive memory incentive = incentives[incentiveId];
@@ -308,25 +308,25 @@ contract UniswapV3Staker is IUniswapV3Staker, Multicall {
 
     /// @dev Stakes a deposited token without doing an ownership check
     function _stakeToken(IncentiveKey memory key, uint256 tokenId) private {
-        require(block.timestamp >= key.startTime, 'UniswapV3Staker::stakeToken: incentive not started');
-        require(block.timestamp < key.endTime, 'UniswapV3Staker::stakeToken: incentive ended');
+        require(block.timestamp >= key.startTime, 'KinetixV3Staker::stakeToken: incentive not started');
+        require(block.timestamp < key.endTime, 'KinetixV3Staker::stakeToken: incentive ended');
 
         bytes32 incentiveId = IncentiveId.compute(key);
 
         require(
             incentives[incentiveId].totalRewardUnclaimed > 0,
-            'UniswapV3Staker::stakeToken: non-existent incentive'
+            'KinetixV3Staker::stakeToken: non-existent incentive'
         );
         require(
             _stakes[tokenId][incentiveId].liquidityNoOverflow == 0,
-            'UniswapV3Staker::stakeToken: token already staked'
+            'KinetixV3Staker::stakeToken: token already staked'
         );
 
         (IUniswapV3Pool pool, int24 tickLower, int24 tickUpper, uint128 liquidity) =
             NFTPositionInfo.getPositionInfo(factory, nonfungiblePositionManager, tokenId);
 
-        require(pool == key.pool, 'UniswapV3Staker::stakeToken: token pool is not the incentive pool');
-        require(liquidity > 0, 'UniswapV3Staker::stakeToken: cannot stake token with 0 liquidity');
+        require(pool == key.pool, 'KinetixV3Staker::stakeToken: token pool is not the incentive pool');
+        require(liquidity > 0, 'KinetixV3Staker::stakeToken: cannot stake token with 0 liquidity');
 
         deposits[tokenId].numberOfStakes++;
         incentives[incentiveId].numberOfStakes++;

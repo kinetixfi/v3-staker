@@ -151,15 +151,15 @@ describe('integration', async () => {
           const actions = {
             doUnstake: (params: HelperTypes.MintDepositStake.Result) =>
               staker
-                .connect(params.lp)
+                .connect(<any>params.lp)
                 .unstakeToken(incentiveResultToStakeAdapter(createIncentiveResult), params.tokenId),
 
             doWithdraw: (params: HelperTypes.MintDepositStake.Result) =>
-              staker.connect(params.lp).withdrawToken(params.tokenId, params.lp.address, '0x'),
+              staker.connect(<any>params.lp).withdrawToken(params.tokenId, params.lp.address, '0x'),
 
             doClaimRewards: (params: HelperTypes.MintDepositStake.Result) =>
               staker
-                .connect(params.lp)
+                .connect(<any>params.lp)
                 .claimReward(createIncentiveResult.rewardToken.address, params.lp.address, BN('0')),
           }
 
@@ -376,7 +376,7 @@ describe('integration', async () => {
           context.nft.address
         )
 
-        await mintPosition(context.nft.connect(lpUser3), {
+        await mintPosition(context.nft.connect(<any>lpUser3), {
           token0: context.token0.address,
           token1: context.token1.address,
           fee: FeeAmount.MEDIUM,
@@ -483,7 +483,7 @@ describe('integration', async () => {
         ticks: [number, number]
       }
 
-      let midpoint = await getCurrentTick(context.poolObj.connect(actors.lpUser0()))
+      let midpoint = await getCurrentTick(context.poolObj.connect(<any>actors.lpUser0()))
 
       const positions: Array<Position> = [
         // lpUser0 stakes 2e18 from min-0
