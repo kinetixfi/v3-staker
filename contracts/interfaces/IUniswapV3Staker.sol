@@ -4,9 +4,9 @@ pragma abicoder v2;
 
 import '@openzeppelin/contracts/token/ERC721/IERC721Receiver.sol';
 
-import '@kinetix/v3-core-smart-contracts/contracts/interfaces/IUniswapV3Factory.sol';
-import '@kinetix/v3-core-smart-contracts/contracts/interfaces/IUniswapV3Pool.sol';
-import '@kinetix/v3-core-smart-contracts/contracts/interfaces/IERC20Minimal.sol';
+import '@kinetix/v3-core/contracts/interfaces/IUniswapV3Factory.sol';
+import '@kinetix/v3-core/contracts/interfaces/IUniswapV3Pool.sol';
+import '@kinetix/v3-core/contracts/interfaces/IERC20Minimal.sol';
 
 import '@kinetix/v3-periphery/contracts/interfaces/INonfungiblePositionManager.sol';
 import '@kinetix/v3-periphery/contracts/interfaces/IMulticall.sol';

@@ -2,8 +2,8 @@
 pragma solidity =0.7.6;
 
 import '@kinetix/v3-periphery/contracts/interfaces/INonfungiblePositionManager.sol';
-import '@kinetix/v3-core-smart-contracts/contracts/interfaces/IUniswapV3Factory.sol';
-import '@kinetix/v3-core-smart-contracts/contracts/interfaces/IUniswapV3Pool.sol';
+import '@kinetix/v3-core/contracts/interfaces/IUniswapV3Factory.sol';
+import '@kinetix/v3-core/contracts/interfaces/IUniswapV3Pool.sol';
 
 import '@kinetix/v3-periphery/contracts/libraries/PoolAddress.sol';
 

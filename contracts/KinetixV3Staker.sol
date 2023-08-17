@@ -8,9 +8,9 @@ import './libraries/RewardMath.sol';
 import './libraries/NFTPositionInfo.sol';
 import './libraries/TransferHelperExtended.sol';
 
-import '@kinetix/v3-core-smart-contracts/contracts/interfaces/IUniswapV3Factory.sol';
-import '@kinetix/v3-core-smart-contracts/contracts/interfaces/IUniswapV3Pool.sol';
-import '@kinetix/v3-core-smart-contracts/contracts/interfaces/IERC20Minimal.sol';
+import '@kinetix/v3-core/contracts/interfaces/IUniswapV3Factory.sol';
+import '@kinetix/v3-core/contracts/interfaces/IUniswapV3Pool.sol';
+import '@kinetix/v3-core/contracts/interfaces/IERC20Minimal.sol';
 
 import '@kinetix/v3-periphery/contracts/interfaces/INonfungiblePositionManager.sol';
 import '@kinetix/v3-periphery/contracts/base/Multicall.sol';

@@ -10,8 +10,7 @@
     "size-contracts": "hardhat compile && hardhat size-contracts",
     "test": "hardhat test",
     "clear-cache": "rm -rf artifacts/ cache/ typechain/",
-    "coverage": "RUN_COVERAGE=1 hardhat coverage",
-    "publish": "npm publish --no-git-checks"
+    "coverage": "RUN_COVERAGE=1 hardhat coverage"
   },
   "homepage": "https://kinetix.finance",
   "keywords": [
@@ -37,7 +36,8 @@
     "node": ">=10"
   },
   "dependencies": {
-    "@kinetix/v3-core-smart-contracts": "^1.0.0",
+    "@kinetix/v3-core": "^1.0.0",
+    "@kinetix/v3-periphery": "^1.0.0",
     "@openzeppelin/contracts": "3.4.1-solc-0.7-2"
   },
   "devDependencies": {
